@@ -94,17 +94,18 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
 /* TABS */
 .tabbar{
   display:flex;
+  gap:6px;
   background:var(--white);
   border-bottom:1.5px solid var(--border);
   flex-shrink:0;
   overflow-x:auto;
   padding-top:max(env(safe-area-inset-top), 54px);
-  padding-left:18px;
-  padding-right:18px;
+  padding-left:14px;
+  padding-right:14px;
   padding-bottom:0;
 }
 .tabbar::-webkit-scrollbar{display:none;}
-.tab{flex:1;min-width:52px;padding:14px 4px 12px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:var(--ink3);border:none;background:transparent;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.15s;white-space:nowrap;min-height:50px;display:flex;align-items:center;justify-content:center;}
+.tab{flex:0 0 auto;min-width:64px;padding:14px 12px 12px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:var(--ink3);border:none;background:transparent;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.15s;white-space:nowrap;min-height:50px;display:flex;align-items:center;justify-content:center;}
 .tab.on{color:var(--ink);border-bottom-color:var(--acc);font-weight:700;}
 
 /* SCROLL */
@@ -377,10 +378,15 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
 .inv-color-qty{width:50px;text-align:center;padding:5px 4px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;font-family:'Poppins',sans-serif;}
 .inv-color-rm{background:none;border:none;color:var(--red);font-size:16px;font-weight:700;cursor:pointer;padding:0 4px;flex-shrink:0;}
 .inv-color-empty{font-size:11px;color:var(--ink3);font-style:italic;}
-.inv-color-add{display:flex;gap:6px;align-items:center;}
+.inv-color-add{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;}
 .inv-color-add-name{flex:1;min-width:0;padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:11px;font-family:'Poppins',sans-serif;}
 .inv-color-add-qty{width:46px;text-align:center;padding:6px 4px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:11px;font-family:'Poppins',sans-serif;}
 .inv-color-add-btn{background:var(--acc);color:#fff;border:none;border-radius:8px;width:26px;height:26px;font-size:15px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.inv-color-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);flex-shrink:0;}
+.inv-color-picker{display:flex;flex-wrap:wrap;gap:6px;flex:1;min-width:0;}
+.inv-color-dot-btn{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;padding:0;}
+.inv-color-dot-btn.selected{border-color:var(--acc);box-shadow:0 0 0 2px var(--al);}
+.inv-color-dot-btn:active{opacity:0.7;}
 .corte-hist-fecha{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;}
 .corte-hist-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);}
 .corte-hist-row:last-child{border-bottom:none;}
@@ -1376,14 +1382,14 @@ const TALLAS_GORRA=['Adulto','Infantil'];
 const TALLAS_ROPA_INF=['CH inf','M inf','G inf'];
 
 const DTF_PRODS=[
-  {key:'play1',icon:'👕',name:'Playera básica 1 lado',sub:'100% algodon, cuello redondo, CH a XG',u:220,m12:205,m30:190,tallas:TALLAS_ROPA},
-  {key:'play2',icon:'👕',name:'Playera básica 2 lados',sub:'Frente y espalda, CH a XG',u:260,m12:245,m30:230,tallas:TALLAS_ROPA},
-  {key:'polo1',icon:'👔',name:'Polo premium 1 lado',sub:'Cuello polo, CH a XG',u:255,m12:240,m30:240,tallas:TALLAS_ROPA},
-  {key:'polo2',icon:'👔',name:'Polo premium 2 lados',sub:'Frente y espalda, CH a XG',u:290,m12:275,m30:275,tallas:TALLAS_ROPA},
+  {key:'play1',icon:'👕',name:'Playera básica 1 lado',sub:'100% algodon, cuello redondo, CH a XG',u:220,m12:205,m30:190,tallas:TALLAS_ROPA,stockGroup:'play_basica',stockName:'Playera básica (lisa)'},
+  {key:'play2',icon:'👕',name:'Playera básica 2 lados',sub:'Frente y espalda, CH a XG',u:260,m12:245,m30:230,tallas:TALLAS_ROPA,stockGroup:'play_basica',stockName:'Playera básica (lisa)'},
+  {key:'polo1',icon:'👔',name:'Polo premium 1 lado',sub:'Cuello polo, CH a XG',u:255,m12:240,m30:240,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
+  {key:'polo2',icon:'👔',name:'Polo premium 2 lados',sub:'Frente y espalda, CH a XG',u:290,m12:275,m30:275,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
   {key:'gorra_d',icon:'🧢',name:'Gorra DTF',sub:'Transfer sobre gorra',u:80,m12:65,m30:65,tallas:TALLAS_GORRA},
   {key:'tote_d',icon:'👜',name:'Tote bag',sub:'Transfer sobre bolsa',u:125,m6:110,m12:95,m30:95,tallas:['Unica']},
-  {key:'play_inf1',icon:'👕',name:'Playera infantil 1 lado',sub:'100% algodon, CH/M/G',u:215,m12:200,m30:185,tallas:TALLAS_ROPA_INF},
-  {key:'play_inf2',icon:'👕',name:'Playera infantil 2 lados',sub:'Frente y espalda, CH/M/G',u:255,m12:240,m30:225,tallas:TALLAS_ROPA_INF},
+  {key:'play_inf1',icon:'👕',name:'Playera infantil 1 lado',sub:'100% algodon, CH/M/G',u:215,m12:200,m30:185,tallas:TALLAS_ROPA_INF,stockGroup:'play_infantil',stockName:'Playera infantil (lisa)'},
+  {key:'play_inf2',icon:'👕',name:'Playera infantil 2 lados',sub:'Frente y espalda, CH/M/G',u:255,m12:240,m30:225,tallas:TALLAS_ROPA_INF,stockGroup:'play_infantil',stockName:'Playera infantil (lisa)'},
 ];
 const UV_PRODS=[
   {key:'cil_l',icon:'🍶',name:'Cilindro Lake',sub:'850ml plastico UV',u:140,m12:125,m30:110,tallas:['850ml']},
@@ -3256,9 +3262,13 @@ async function saveStock(){
 // Resta del stock automaticamente cuando se guarda un pedido (por talla y color si aplica)
 function decrementStock(tipoKey, prodKey, variantes, qty){
   if(!tipoKey || !prodKey) return;
+  // Si el producto pertenece a un grupo de inventario compartido (ej. playera 1 lado / 2 lados), usar esa llave
+  const prodsMap = { dtf: DTF_PRODS, uv: UV_PRODS, sub: SUB_PRODS };
+  const prodDef = prodsMap[tipoKey]?.find(x => x.key === prodKey);
+  const stockKey = prodDef?.stockGroup || prodKey;
   if(!STOCK[tipoKey]) STOCK[tipoKey]={};
-  if(!STOCK[tipoKey][prodKey]) return; // no se ha registrado stock para este producto, no descontar nada
-  const prodStock = STOCK[tipoKey][prodKey];
+  if(!STOCK[tipoKey][stockKey]) return; // no se ha registrado stock para este producto, no descontar nada
+  const prodStock = STOCK[tipoKey][stockKey];
   if(variantes && variantes.length>0){
     variantes.forEach(v=>{
       const talla=v.talla||'General';
@@ -3303,6 +3313,35 @@ document.getElementById('inv-toggle')?.addEventListener('click', e => {
   document.getElementById('inv-estudio-wrap').style.display = invTab==='estudio'?'block':'none';
   if(invTab==='estudio') renderInvEstudio();
 });
+
+
+// ── Paleta de colores para el inventario (puntos en vez de texto escrito) ──
+const COLOR_PALETTE = [
+  {name:'Negro', hex:'#1a1a1a'},
+  {name:'Blanco', hex:'#ffffff'},
+  {name:'Gris', hex:'#9b9b9b'},
+  {name:'Rojo', hex:'#e53935'},
+  {name:'Azul', hex:'#1e6fd9'},
+  {name:'Azul marino', hex:'#0d2c54'},
+  {name:'Verde', hex:'#2e8b3d'},
+  {name:'Amarillo', hex:'#f5c800'},
+  {name:'Naranja', hex:'#f0791f'},
+  {name:'Rosa', hex:'#e8197a'},
+  {name:'Morado', hex:'#7e3ff2'},
+  {name:'Café', hex:'#6b4226'},
+  {name:'Beige', hex:'#e8dcc8'},
+  {name:'Vino', hex:'#7a1f3d'},
+];
+function colorToHex(name){
+  const found = COLOR_PALETTE.find(c => c.name.toLowerCase() === (name||'').toLowerCase());
+  if(found) return found.hex;
+  if((name||'').toLowerCase()==='sin color') return 'var(--border)';
+  return '#bbbbbb';
+}
+function renderColorPicker(){
+  const dots = COLOR_PALETTE.map(c=>`<button type="button" class="inv-color-dot-btn" data-color="${c.name}" style="background:${c.hex};" title="${c.name}"></button>`).join('');
+  return `<div class="inv-color-picker" data-selected="">${dots}</div>`;
+}
 
 function renderInvTaller(){
   const wrap = document.getElementById('inv-servicios-list');
@@ -3354,12 +3393,22 @@ function renderInvTaller(){
       });
     } else {
       // DTF / UV / SUB: producto fisico con stock real por talla y por color — colapsado por defecto
+      // Si varios productos comparten stockGroup (ej. playera 1 lado / 2 lados), se agrupan en un solo renglon de inventario
+      const yaRenderizados = new Set();
       sec.prods.forEach(p => {
+        const groupKey = p.stockGroup || p.key; // llave real usada para STOCK
+        if(yaRenderizados.has(groupKey)) return; // ya se mostro este grupo (ej. play1 ya mostro 'play_basica')
+        yaRenderizados.add(groupKey);
+        const displayName = p.stockName || p.name;
+        // Tallas: tomar la union de tallas de todos los productos que compartan este grupo
+        const hermanos = sec.prods.filter(x => (x.stockGroup || x.key) === groupKey);
+        const tallasSet = new Set();
+        hermanos.forEach(h => (h.tallas && h.tallas.length ? h.tallas : ['General']).forEach(t => tallasSet.add(t)));
+        const tallas = Array.from(tallasSet);
         const pr = sec.pr[p.key] || { u: p.u, m12: p.m12, m30: p.m30 };
-        const tallas = p.tallas && p.tallas.length ? p.tallas : ['General'];
         if(!STOCK[sec.tipoKey]) STOCK[sec.tipoKey]={};
-        if(!STOCK[sec.tipoKey][p.key]) STOCK[sec.tipoKey][p.key]={};
-        const stockObj = STOCK[sec.tipoKey][p.key]; // { talla: { color: qty } }
+        if(!STOCK[sec.tipoKey][groupKey]) STOCK[sec.tipoKey][groupKey]={};
+        const stockObj = STOCK[sec.tipoKey][groupKey]; // { talla: { color: qty } }
         let totalStock = 0;
         const tallaRows = tallas.map(t=>{
           const coloresObj = (typeof stockObj[t]==='object' && stockObj[t]!==null) ? stockObj[t] : (stockObj[t]!=null ? {'Sin color':stockObj[t]} : {});
@@ -3367,7 +3416,8 @@ function renderInvTaller(){
           const subTotal = colorEntries.reduce((a,[,q])=>a+(q||0),0);
           totalStock += subTotal;
           const colorRows = colorEntries.map(([color,qty])=>`
-            <div class="inv-color-row" data-tipo="${sec.tipoKey}" data-key="${p.key}" data-talla="${t}" data-color="${color}">
+            <div class="inv-color-row" data-tipo="${sec.tipoKey}" data-key="${groupKey}" data-talla="${t}" data-color="${color}">
+              <span class="inv-color-dot" style="background:${colorToHex(color)};"></span>
               <span class="inv-color-name">${color}</span>
               <input class="inv-color-qty" type="number" min="0" value="${qty}">
               <button class="inv-color-rm" type="button">×</button>
@@ -3379,8 +3429,8 @@ function renderInvTaller(){
             </div>
             <div class="inv-talla-detail">
               <div class="inv-color-list">${colorRows || '<div class="inv-color-empty">Sin color registrado</div>'}</div>
-              <div class="inv-color-add" data-tipo="${sec.tipoKey}" data-key="${p.key}" data-talla="${t}">
-                <input class="inv-color-add-name" type="text" placeholder="Color">
+              <div class="inv-color-add" data-tipo="${sec.tipoKey}" data-key="${groupKey}" data-talla="${t}">
+                ${renderColorPicker()}
                 <input class="inv-color-add-qty" type="number" min="0" placeholder="Cant.">
                 <button class="inv-color-add-btn" type="button">+</button>
               </div>
@@ -3392,8 +3442,8 @@ function renderInvTaller(){
         rows_html += `<div class="inv-prod-row inv-prod-collapsible" data-prod-toggle>
           <div class="inv-prod-icon">${p.icon}</div>
           <div class="inv-prod-info">
-            <div class="inv-prod-name">${p.name}</div>
-            <div class="inv-prod-sub">${p.sub} · $${pr.u}/u</div>
+            <div class="inv-prod-name">${displayName}</div>
+            <div class="inv-prod-sub">${hermanos.length>1?'Inventario compartido: '+hermanos.map(h=>h.name).join(' + '):p.sub}</div>
           </div>
           <span class="inv-stock-badge ${stockCls}">${stockLabel}</span>
         </div>
@@ -3455,13 +3505,22 @@ function renderInvTaller(){
       toast('Color eliminado del inventario');
     });
   });
+  wrap.querySelectorAll('.inv-color-dot-btn').forEach(dot=>{
+    dot.addEventListener('click', () => {
+      const picker = dot.closest('.inv-color-picker');
+      picker.querySelectorAll('.inv-color-dot-btn').forEach(d=>d.classList.remove('selected'));
+      dot.classList.add('selected');
+      picker.dataset.selected = dot.dataset.color;
+    });
+  });
   wrap.querySelectorAll('.inv-color-add-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const wrapEl = btn.closest('.inv-color-add');
       const tipoKey=wrapEl.dataset.tipo, key=wrapEl.dataset.key, talla=wrapEl.dataset.talla;
-      const nameInp = wrapEl.querySelector('.inv-color-add-name');
+      const picker = wrapEl.querySelector('.inv-color-picker');
       const qtyInp = wrapEl.querySelector('.inv-color-add-qty');
-      const colorName = (nameInp.value||'Sin color').trim() || 'Sin color';
+      const colorName = picker.dataset.selected || '';
+      if(!colorName){ toast('Toca un color antes de agregar'); return; }
       const qty = Math.max(0,parseInt(qtyInp.value)||0);
       if(!STOCK[tipoKey]) STOCK[tipoKey]={};
       if(!STOCK[tipoKey][key]) STOCK[tipoKey][key]={};
