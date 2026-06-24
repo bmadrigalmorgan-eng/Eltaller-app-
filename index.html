@@ -574,9 +574,14 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
       <div class="hub-sub">Playeras · Gorras · Tote bags · Polo</div>
     </div>
     <div class="hub-card" onclick="goTabInner('servicios');showSrv('uv')">
-      <div class="hub-icon">🖨️</div>
-      <div class="hub-title">DTF UV · Vinil</div>
+      <div class="hub-icon">🥤</div>
+      <div class="hub-title">Vasos y cilindros</div>
       <div class="hub-sub">Cilindro Lake · Vaso chupón · Cafetalero</div>
+    </div>
+    <div class="hub-card" onclick="goTabInner('servicios');showSrv('dtfuv')">
+      <div class="hub-icon">🖨️</div>
+      <div class="hub-title">DTF UV</div>
+      <div class="hub-sub">Stickers DTF UV por medida</div>
     </div>
     <div class="hub-card" onclick="goTabInner('servicios');showSrv('sub')">
       <div class="hub-icon">☕</div>
@@ -682,7 +687,8 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
     <div class="s-label" style="margin-top:0;">Tipo de trabajo</div>
     <div class="nav-grid" style="margin-bottom:0;">
       <div class="nav-card" onclick="showSrv('dtf')"><div class="nav-icon">👕</div><div class="nav-title">DTF</div><div class="nav-sub">Producto tuyo</div></div>
-      <div class="nav-card" onclick="showSrv('uv')"><div class="nav-icon">🖨️</div><div class="nav-title">DTF UV · Vinil</div><div class="nav-sub">Vasitos y cilindros</div></div>
+      <div class="nav-card" onclick="showSrv('uv')"><div class="nav-icon">🥤</div><div class="nav-title">Vasos y cilindros</div><div class="nav-sub">Vasitos y cilindros</div></div>
+      <div class="nav-card" onclick="showSrv('dtfuv')"><div class="nav-icon">🖨️</div><div class="nav-title">DTF UV</div><div class="nav-sub">Stickers por medida</div></div>
       <div class="nav-card" onclick="showSrv('sub')"><div class="nav-icon">☕</div><div class="nav-title">Sublimacion</div><div class="nav-sub">Producto tuyo</div></div>
       <div class="nav-card" onclick="showSrv('cli')"><div class="nav-icon">📦</div><div class="nav-title">Solo diseno</div><div class="nav-sub">Precio libre</div></div>
       <div class="nav-card" onclick="showSrv('multi')"><div class="nav-icon">🧾</div><div class="nav-title">Cotizacion mixta</div><div class="nav-sub">Varios juntos</div></div>
@@ -738,7 +744,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
 
 
   <div id="srv-uv" style="display:none;">
-    <div class="s-label" style="margin-top:0;">Producto DTF UV · Vinil</div>
+    <div class="s-label" style="margin-top:0;">Producto Vasos y cilindros</div>
     <div class="prod-grid" id="uv-prods"></div>
     <div class="card">
       <div class="row2">
@@ -781,6 +787,53 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
       <button class="btn-s" id="uv-cot">Cotizacion WA</button>
       <button class="btn-s" onclick="addToMulti('uv')">+ Mixta</button>
       <button class="btn-p btn-g" id="uv-save">Guardar</button>
+    </div>
+  </div>
+
+  <div id="srv-dtfuv" style="display:none;">
+    <div class="s-label" style="margin-top:0;">Producto DTF UV</div>
+    <div class="prod-grid" id="dtfuv-prods"></div>
+    <div class="card">
+      <div class="row2">
+        <div class="field"><div class="fl">Cantidad total</div><input class="inp ctr" type="number" min="1" value="1" id="dtfuv-qty"></div>
+        <div class="field"><div class="fl">Nombre diseño</div><input class="inp" id="dtfuv-nom" placeholder="Ej: Logo empresa"></div>
+      </div>
+      <div id="dtfuv-variantes-wrap"></div>
+      <div class="field" style="margin-top:10px;"><div class="fl">Nota</div><input class="inp" id="dtfuv-nota" placeholder="Color, fecha entrega..."></div>
+    </div>
+    <div class="card hl">
+      <div style="font-size:12px;color:var(--ink2);margin-bottom:4px;">Total estimado</div>
+      <div style="font-size:28px;font-weight:700;" id="dtfuv-tot">$0</div>
+      <div style="font-size:11px;color:var(--ink3);margin-top:2px;" id="dtfuv-det">Selecciona un producto</div>
+    </div>
+    <div class="s-label" style="margin-top:16px;">Forma de pago</div>
+    <div class="card" style="margin-bottom:0;">
+      <div class="pago-tipo" id="dtfuv-pago-tipo">
+        <button class="pago-btn on" data-pago="efectivo">💵 Efectivo</button>
+        <button class="pago-btn" data-pago="tarjeta">💳 Tarjeta</button>
+        <button class="pago-btn" data-pago="transferencia">📲 Transfer</button>
+      </div>
+      <div class="row2" style="margin-bottom:10px;">
+        <div class="field"><div class="fl">Anticipo $</div><input class="inp ctr" type="number" min="0" id="dtfuv-anticipo" placeholder="0"></div>
+        <div class="field"><div class="fl">% rapido</div>
+          <select class="inp" id="dtfuv-pct" onchange="calcPagoWidget('dtfuv')">
+            <option value="0">Personalizado</option>
+            <option value="50" selected>50% anticipo</option>
+            <option value="100">100% pagado</option>
+            <option value="30">30% anticipo</option>
+          </select>
+        </div>
+      </div>
+      <div class="saldo-box">
+        <div class="saldo-row"><span>Total</span><span id="dtfuv-saldo-tot">$0</span></div>
+        <div class="saldo-row"><span>Anticipo</span><span id="dtfuv-saldo-ant" style="color:var(--green);">-$0</span></div>
+        <div class="saldo-row"><span>Saldo al entregar</span><span id="dtfuv-saldo-rest">$0</span></div>
+      </div>
+    </div>
+    <div class="act3" style="margin-top:14px;">
+      <button class="btn-s" id="dtfuv-cot">Cotizacion WA</button>
+      <button class="btn-s" onclick="addToMulti('dtfuv')">+ Mixta</button>
+      <button class="btn-p btn-g" id="dtfuv-save">Guardar</button>
     </div>
   </div>
 
@@ -1176,7 +1229,8 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
   <div class="s-label" style="margin-top:0;">Agregar nuevos productos</div>
   <div class="nav-grid" style="margin-bottom:20px;">
     <div class="nav-card" onclick="showAjustesSection('dtf-prod')"><div class="nav-icon">👕</div><div class="nav-title">Productos DTF</div><div class="nav-sub">Agregar playeras, gorras...</div></div>
-    <div class="nav-card" onclick="showAjustesSection('uv-prod')"><div class="nav-icon">🖨️</div><div class="nav-title">DTF UV · Vinil</div><div class="nav-sub">Agregar vasitos, cilindros...</div></div>
+    <div class="nav-card" onclick="showAjustesSection('uv-prod')"><div class="nav-icon">🥤</div><div class="nav-title">Vasos y cilindros</div><div class="nav-sub">Agregar vasitos, cilindros...</div></div>
+    <div class="nav-card" onclick="showAjustesSection('dtfuv-prod')"><div class="nav-icon">🖨️</div><div class="nav-title">DTF UV</div><div class="nav-sub">Agregar nuevas medidas</div></div>
     <div class="nav-card" onclick="showAjustesSection('sub-prod')"><div class="nav-icon">☕</div><div class="nav-title">Productos Sub.</div><div class="nav-sub">Agregar tazas, termos...</div></div>
     <div class="nav-card" onclick="showAjustesSection('pap-prod')"><div class="nav-icon">🖨️</div><div class="nav-title">Tipos de papel</div><div class="nav-sub">Agregar nuevos papeles</div></div>
     <div class="nav-card" onclick="showAjustesSection('stk-sizes')"><div class="nav-icon">🏷️</div><div class="nav-title">Medidas stickers</div><div class="nav-sub">Agregar nuevas medidas</div></div>
@@ -1195,13 +1249,24 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
   </div>
 
   <div id="aj-uv-prod" style="display:none;">
-    <div class="s-label" style="margin-top:0;">Productos DTF UV · Vinil <span style="cursor:pointer;color:var(--acc);" onclick="showAjustesSection('main')">← volver</span></div>
+    <div class="s-label" style="margin-top:0;">Productos Vasos y cilindros <span style="cursor:pointer;color:var(--acc);" onclick="showAjustesSection('main')">← volver</span></div>
     <div id="aj-uv-list"></div>
     <div class="card">
       <div class="row2"><div class="field"><div class="fl">Nombre</div><input class="inp" id="aj-uv-name" placeholder="Ej: Vaso 600ml"></div><div class="field"><div class="fl">Icono emoji</div><input class="inp ctr" id="aj-uv-icon" placeholder="🥤" maxlength="2"></div></div>
       <div class="row2"><div class="field"><div class="fl">Descripcion</div><input class="inp" id="aj-uv-desc" placeholder="Ej: Plastico UV"></div><div class="field"><div class="fl">Tallas</div><select class="inp" id="aj-uv-tallas"><option value="vasos">Vasos/ml</option><option value="unica">Talla unica</option></select></div></div><div class="row2"><div class="field"><div class="fl">Tamaño (oz/ml)</div><input class="inp" id="aj-uv-tam" placeholder="Ej: 850ml, 500ml, 16oz"></div></div>
       <div class="row2"><div class="field"><div class="fl">Precio unitario $</div><input class="inp ctr" type="number" id="aj-uv-u" placeholder="0"></div><div class="field"><div class="fl">Precio mayoreo $</div><input class="inp ctr" type="number" id="aj-uv-m" placeholder="0"></div></div>
-      <button class="btn-p" onclick="saveNewProd('uv')">Agregar producto UV · Vinil</button>
+      <button class="btn-p" onclick="saveNewProd('uv')">Agregar producto</button>
+    </div>
+  </div>
+
+  <div id="aj-dtfuv-prod" style="display:none;">
+    <div class="s-label" style="margin-top:0;">Productos DTF UV <span style="cursor:pointer;color:var(--acc);" onclick="showAjustesSection('main')">← volver</span></div>
+    <div id="aj-dtfuv-list"></div>
+    <div class="card">
+      <div class="row2"><div class="field"><div class="fl">Medida (ej. 5x5)</div><input class="inp" id="aj-dtfuv-name" placeholder="Ej: 25x25"></div><div class="field"><div class="fl">Icono emoji</div><input class="inp ctr" id="aj-dtfuv-icon" placeholder="🖨️" maxlength="2"></div></div>
+      <div class="row2"><div class="field"><div class="fl">Descripcion</div><input class="inp" id="aj-dtfuv-desc" placeholder="Ej: Tamaño grande"></div></div>
+      <div class="row2"><div class="field"><div class="fl">Precio unitario $</div><input class="inp ctr" type="number" id="aj-dtfuv-u" placeholder="0"></div></div>
+      <button class="btn-p" onclick="saveNewProd('dtfuv')">Agregar medida DTF UV</button>
     </div>
   </div>
 
@@ -1267,9 +1332,16 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
   </div>
 
   <div class="aj-price-section">
-    <div class="aj-price-header" data-aj-toggle>🖨️ DTF UV · Vinil <span class="aj-price-arrow">▼</span></div>
+    <div class="aj-price-header" data-aj-toggle>🥤 Vasos y cilindros <span class="aj-price-arrow">▼</span></div>
     <div class="aj-price-body">
       <div class="pr-box"><div class="pr-head pr-head3"><span>Producto</span><span>Unit. $</span><span>12+ $</span><span>30+ $</span></div><div id="pe-uv"></div></div>
+    </div>
+  </div>
+
+  <div class="aj-price-section">
+    <div class="aj-price-header" data-aj-toggle>🖨️ DTF UV <span class="aj-price-arrow">▼</span></div>
+    <div class="aj-price-body">
+      <div class="pr-box"><div class="pr-head pr-head3"><span>Medida</span><span>Unit. $</span><span>12+ $</span><span>30+ $</span></div><div id="pe-dtfuv"></div></div>
     </div>
   </div>
 
@@ -1474,8 +1546,8 @@ const TALLAS_ROPA_INF=['CH inf','M inf','G inf'];
 const DTF_PRODS=[
   {key:'play1',icon:'👕',name:'Playera básica 1 lado',sub:'100% algodon, cuello redondo, CH a XG',u:220,m12:205,m30:190,tallas:TALLAS_ROPA,stockGroup:'play_basica',stockName:'Playera básica (lisa)'},
   {key:'play2',icon:'👕',name:'Playera básica 2 lados',sub:'Frente y espalda, CH a XG',u:260,m12:245,m30:230,tallas:TALLAS_ROPA,stockGroup:'play_basica',stockName:'Playera básica (lisa)'},
-  {key:'polo1',icon:'👔',name:'Polo premium 1 lado',sub:'Cuello polo, CH a XG',u:255,m12:240,m30:240,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
-  {key:'polo2',icon:'👔',name:'Polo premium 2 lados',sub:'Frente y espalda, CH a XG',u:290,m12:275,m30:275,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
+  {key:'polo1',icon:'👔',name:'Polo premium 1 lado',sub:'Cuello polo, CH a XG',u:255,m12:240,m30:225,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
+  {key:'polo2',icon:'👔',name:'Polo premium 2 lados',sub:'Frente y espalda, CH a XG',u:290,m12:275,m30:260,tallas:TALLAS_ROPA,stockGroup:'polo_premium',stockName:'Polo premium (lisa)'},
   {key:'gorra_d',icon:'🧢',name:'Gorra DTF',sub:'Transfer sobre gorra',u:80,m12:65,m30:65,tallas:TALLAS_GORRA},
   {key:'tote_d',icon:'👜',name:'Tote bag',sub:'Transfer sobre bolsa',u:125,m6:110,m12:95,m30:95,tallas:['Unica']},
   {key:'play_inf1',icon:'👕',name:'Playera infantil 1 lado',sub:'100% algodon, CH/M/G',u:215,m12:200,m30:185,tallas:TALLAS_ROPA_INF,stockGroup:'play_infantil',stockName:'Playera infantil (lisa)'},
@@ -1485,6 +1557,21 @@ const UV_PRODS=[
   {key:'cil_l',icon:'🍶',name:'Cilindro Lake',sub:'850ml plastico UV',u:140,m12:125,m30:110,tallas:['850ml']},
   {key:'vaso_ch',icon:'🥤',name:'Vaso chupon',sub:'500ml plastico UV',u:70,m12:55,m30:45,tallas:['500ml']},
   {key:'vaso_ca',icon:'☕',name:'Vaso cafetalero',sub:'16oz plastico UV',u:90,m12:75,m30:60,tallas:['16oz']},
+];
+// ── Area independiente: Stickers DTF UV — vinil impreso por medida, sin mayoreo ──
+const DTFUV_PRODS=[
+  {key:'stk_uv_3x3',icon:'🖼️',name:'Sticker DTF UV 3×3 cm',sub:'Tamaño pequeño',u:10,m12:10,m30:10,tallas:['Unica']},
+  {key:'stk_uv_5x5',icon:'🖼️',name:'Sticker DTF UV 5×5 cm',sub:'Tamaño pequeño',u:20,m12:20,m30:20,tallas:['Unica']},
+  {key:'stk_uv_6x6',icon:'🖼️',name:'Sticker DTF UV 6×6 cm',sub:'Tamaño pequeño',u:22,m12:22,m30:22,tallas:['Unica']},
+  {key:'stk_uv_7x7',icon:'🖼️',name:'Sticker DTF UV 7×7 cm',sub:'Tamaño pequeño',u:25,m12:25,m30:25,tallas:['Unica']},
+  {key:'stk_uv_10x10',icon:'🖼️',name:'Sticker DTF UV 10×10 cm',sub:'Tamaño mediano',u:30,m12:30,m30:30,tallas:['Unica']},
+  {key:'stk_uv_10x15',icon:'🖼️',name:'Sticker DTF UV 10×15 cm',sub:'Tamaño mediano',u:40,m12:40,m30:40,tallas:['Unica']},
+  {key:'stk_uv_15x15',icon:'🖼️',name:'Sticker DTF UV 15×15 cm',sub:'Tamaño mediano',u:55,m12:55,m30:55,tallas:['Unica']},
+  {key:'stk_uv_20x10',icon:'🖼️',name:'Sticker DTF UV 20×10 cm',sub:'Tamaño mediano',u:65,m12:65,m30:65,tallas:['Unica']},
+  {key:'stk_uv_20x20',icon:'🖼️',name:'Sticker DTF UV 20×20 cm',sub:'Tamaño grande',u:110,m12:110,m30:110,tallas:['Unica']},
+  {key:'stk_uv_30x20',icon:'🖼️',name:'Sticker DTF UV 30×20 cm',sub:'Tamaño grande',u:140,m12:140,m30:140,tallas:['Unica']},
+  {key:'stk_uv_40x20',icon:'🖼️',name:'Sticker DTF UV 40×20 cm',sub:'Tamaño grande',u:185,m12:185,m30:185,tallas:['Unica']},
+  {key:'stk_uv_40x30',icon:'🖼️',name:'Sticker DTF UV 40×30 cm',sub:'Tamaño grande',u:280,m12:280,m30:280,tallas:['Unica']},
 ];
 const SUB_PRODS=[
   {key:'taza_b',icon:'☕',name:'Taza blanca',sub:'11oz ceramica',u:90,m12:75,m30:65,tallas:['11oz']},
@@ -1557,12 +1644,14 @@ let DTF_PR={}, SUB_PR={}, PAP_PR={}, COL_PR={};
 DTF_PRODS.forEach(p=>DTF_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30});
 let UV_PR={};
 UV_PRODS.forEach(p=>UV_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30});
+let DTFUV_PR={};
+DTFUV_PRODS.forEach(p=>DTFUV_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30});
 SUB_PRODS.forEach(p=>SUB_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30});
 PAPEL_TIPOS.forEach(p=>PAP_PR[p.key]={u1:p.u,u2:p.u2});
 
 let pedidos=[], colInv=[], colVentas=[], multiItems=[];
 let periodoFiltro='mes'; // mes|pasado|semana|todo|custom
-let selectedDtf=null, selectedSub=null, selectedUv=null, selectedCli=null, selectedPapel=null;
+let selectedDtf=null, selectedSub=null, selectedUv=null, selectedDtfuv=null, selectedCli=null, selectedPapel=null;
 let mat='normal', mode='pieza', corte='simple', stkUid=1, designs=[];
 
 // Load prices from Firestore
@@ -1577,6 +1666,7 @@ async function loadPrices(){
       if(p.hojaComplejo) HOJA_COMPLEJO=p.hojaComplejo;
       if(p.dtf) DTF_PR=p.dtf;
       if(p.uv) UV_PR=p.uv;
+      if(p.dtfuv) DTFUV_PR=p.dtfuv;
       if(p.sub) SUB_PR=p.sub;
       if(p.papel) PAP_PR=p.papel;
     }
@@ -1845,11 +1935,12 @@ document.getElementById('sk-save').addEventListener('click',async()=>{
 
 // ── SERVICIOS ──
 window.showSrv = function(w){
-  ['home','dtf','uv','sub','cli','multi'].forEach(x=>document.getElementById('srv-'+x).style.display='none');
+  ['home','dtf','uv','dtfuv','sub','cli','multi'].forEach(x=>document.getElementById('srv-'+x).style.display='none');
   document.getElementById('srv-'+w).style.display='block';
   updateFloatNav(w==='home'?'hub':'servicios');
   if(w==='dtf'){renderProdGrid('dtf-prods',DTF_PRODS,()=>selectedDtf,'dtf');renderVariantes('dtf-variantes-wrap',DTF_PRODS.find(p=>p.key===selectedDtf)?.tallas||TALLAS_ROPA);}
   if(w==='uv'){renderProdGrid('uv-prods',UV_PRODS,()=>selectedUv,'uv');renderVariantes('uv-variantes-wrap',UV_PRODS.find(p=>p.key===selectedUv)?.tallas||TALLAS_VASO);}
+  if(w==='dtfuv'){renderProdGrid('dtfuv-prods',DTFUV_PRODS,()=>selectedDtfuv,'dtfuv');renderVariantes('dtfuv-variantes-wrap',DTFUV_PRODS.find(p=>p.key===selectedDtfuv)?.tallas||['Unica']);}
   if(w==='sub'){renderProdGrid('sub-prods',SUB_PRODS,()=>selectedSub,'sub');renderVariantes('sub-variantes-wrap',SUB_PRODS.find(p=>p.key===selectedSub)?.tallas||[]);}
   if(w==='cli'){renderProdGrid('cli-tipos',CLI_TIPOS,()=>selectedCli,'cli');renderVariantes('cli-variantes-wrap',CLI_TIPOS.find(p=>p.key===selectedCli)?.tallas||TALLAS_ROPA);}
   if(w==='multi'){renderMultiCatalogo();renderMulti();}
@@ -1858,16 +1949,17 @@ window.showSrv = function(w){
 function renderProdGrid(elId, prods, getSelected, tipo){
   const el=document.getElementById(elId);el.innerHTML='';
   prods.forEach(p=>{
-    const pr=tipo==='dtf'?DTF_PR[p.key]:tipo==='uv'?UV_PR[p.key]:tipo==='sub'?SUB_PR[p.key]:null;
+    const pr=tipo==='dtf'?DTF_PR[p.key]:tipo==='uv'?UV_PR[p.key]:tipo==='dtfuv'?DTFUV_PR[p.key]:tipo==='sub'?SUB_PR[p.key]:null;
     const div=document.createElement('div');div.className='prod-card'+(getSelected()===p.key?' on':'');
     div.innerHTML=`<div class="prod-icon">${p.icon}</div><div class="prod-name">${p.name}</div><div class="prod-sub">${p.sub}</div>${pr?`<div class="prod-prices"><span class="pp">$${pr.u}</span><span class="pp mayo">12+ $${pr.m12??pr.m??pr.u}</span>${pr.m30&&pr.m30!==pr.m12?`<span class="pp mayo">30+ $${pr.m30}</span>`:""}</div>`:''}`;
     div.addEventListener('click',()=>{
       if(tipo==='dtf'){selectedDtf=p.key;renderVariantes('dtf-variantes-wrap',p.tallas||TALLAS_ROPA);}
       if(tipo==='uv'){selectedUv=p.key;renderVariantes('uv-variantes-wrap',p.tallas||TALLAS_VASO);}
+      if(tipo==='dtfuv'){selectedDtfuv=p.key;renderVariantes('dtfuv-variantes-wrap',p.tallas||['Unica']);}
       if(tipo==='sub'){selectedSub=p.key;renderVariantes('sub-variantes-wrap',p.tallas||[]);}
       if(tipo==='cli'){selectedCli=p.key;renderVariantes('cli-variantes-wrap',p.tallas||TALLAS_ROPA);}
       renderProdGrid(elId,prods,getSelected,tipo);
-      if(tipo==='dtf')calcDtf();if(tipo==='uv')calcUv();if(tipo==='sub')calcSub();if(tipo==='cli')calcCli();
+      if(tipo==='dtf')calcDtf();if(tipo==='uv')calcUv();if(tipo==='dtfuv')calcDtfuv();if(tipo==='sub')calcSub();if(tipo==='cli')calcCli();
     });
     el.appendChild(div);
   });
@@ -1897,6 +1989,18 @@ function calcUv(){
   calcPagoWidget('uv',tot);
 }
 
+function calcDtfuv(){
+  const p=DTFUV_PRODS.find(x=>x.key===selectedDtfuv);
+  if(!p){document.getElementById('dtfuv-tot').textContent='$0';document.getElementById('dtfuv-det').textContent='Selecciona un producto';return;}
+  const pr=DTFUV_PR[p.key]||{u:p.u,m:p.m};
+  const qty=parseInt(document.getElementById('dtfuv-qty').value)||1;
+  const base=getPrecioTier(pr,qty);const mayo=qty>=MAYOREO;
+  const tot=qty*base;
+  document.getElementById('dtfuv-tot').textContent='$'+tot.toLocaleString('es-MX');
+  document.getElementById('dtfuv-det').textContent=`${qty} pzas × $${base} · ${mayo?'Mayoreo':'Unitario'}`;
+  calcPagoWidget('dtfuv',tot);
+}
+
 
 function calcSub(){
   const p=SUB_PRODS.find(x=>x.key===selectedSub);
@@ -1910,6 +2014,7 @@ function calcSub(){
   calcPagoWidget('sub',stot);
 }
 document.getElementById('uv-qty').addEventListener('input',calcUv);
+document.getElementById('dtfuv-qty').addEventListener('input',calcDtfuv);
 document.getElementById('sub-qty').addEventListener('input',calcSub);
 
 function calcCli(){
@@ -1939,7 +2044,15 @@ function getSrvData(tipo){
     const qty=parseInt(document.getElementById('uv-qty').value)||1;
     const base=getPrecioTier(pr,qty);const mayo=qty>=MAYOREO;
     const vars=getVariantes('uv-variantes-wrap');
-    return{tipo:'DTF UV · Vinil',tipoKey:'uv',prodKey:p.key,prod:p.name,nombre:document.getElementById('uv-nom').value||p.name,qty,total:qty*base,nota:document.getElementById('uv-nota').value,variantes:vars,varStr:variantesStr(vars)};
+    return{tipo:'Vasos y cilindros',tipoKey:'uv',prodKey:p.key,prod:p.name,nombre:document.getElementById('uv-nom').value||p.name,qty,total:qty*base,nota:document.getElementById('uv-nota').value,variantes:vars,varStr:variantesStr(vars)};
+  }
+  if(tipo==='dtfuv'){
+    const p=DTFUV_PRODS.find(x=>x.key===selectedDtfuv);if(!p)return null;
+    const pr=DTFUV_PR[p.key]||{u:p.u,m:p.m};
+    const qty=parseInt(document.getElementById('dtfuv-qty').value)||1;
+    const base=getPrecioTier(pr,qty);
+    const vars=getVariantes('dtfuv-variantes-wrap');
+    return{tipo:'DTF UV',tipoKey:'dtfuv',prodKey:p.key,prod:p.name,nombre:document.getElementById('dtfuv-nom').value||p.name,qty,total:qty*base,nota:document.getElementById('dtfuv-nota').value,variantes:vars,varStr:variantesStr(vars)};
   }
   if(tipo==='sub'){
     const p=SUB_PRODS.find(x=>x.key===selectedSub);if(!p)return null;
@@ -1964,7 +2077,8 @@ async function saveSrvPed(tipo){
   const cli=await customPrompt('Nombre del cliente');if(!cli){toast('El nombre es obligatorio.');return;}
   const id=genId();const folio=genFolio();
   const detStr=d.nombre+' ×'+d.qty+(d.varStr?' | '+d.varStr:'');
-  const pagoD=getPagoData(tipo==='dtf'?'dtf':tipo==='sub'?'sub':'cli',d.total);
+  const pagoPrefixMap={dtf:'dtf',uv:'uv',dtfuv:'dtfuv',sub:'sub',cli:'cli'};
+  const pagoD=getPagoData(pagoPrefixMap[tipo]||'cli',d.total);
   try {
     await setDoc(doc(db,'pedidos',id),{id,folio,fecha:new Date().toISOString(),cliente:cli,tel:'',nota:d.nota,tipo:d.tipo,detalle:detStr,total:d.total,status:'pendiente',variantes:d.variantes||[],pago:pagoD});
   } catch(e) {
@@ -1985,9 +2099,11 @@ function sendSrvCot(tipo){
 document.getElementById('dtf-save').addEventListener('click',()=>saveSrvPed('dtf'));
 document.getElementById('sub-save').addEventListener('click',()=>saveSrvPed('sub'));
 document.getElementById('uv-save').addEventListener('click',()=>saveSrvPed('uv'));
+document.getElementById('dtfuv-save').addEventListener('click',()=>saveSrvPed('dtfuv'));
 document.getElementById('cli-save').addEventListener('click',()=>saveSrvPed('cli'));
 document.getElementById('dtf-cot').addEventListener('click',()=>sendSrvCot('dtf'));
 document.getElementById('uv-cot').addEventListener('click',()=>sendSrvCot('uv'));
+document.getElementById('dtfuv-cot').addEventListener('click',()=>sendSrvCot('dtfuv'));
 document.getElementById('sub-cot').addEventListener('click',()=>sendSrvCot('sub'));
 document.getElementById('cli-cot').addEventListener('click',()=>sendSrvCot('cli'));
 
@@ -1995,10 +2111,10 @@ window.addToMulti = function(tipo){
   const d=getSrvData(tipo);if(!d){toast('Selecciona un producto primero.');return;}
   // Agregar precioTag y mayoreoTag para el desglose
   let mayoreoTag='',precioTag='';
-  if(tipo==='dtf'||tipo==='uv'||tipo==='sub'){
-    const prs=tipo==='dtf'?DTF_PR:tipo==='uv'?UV_PR:SUB_PR;
-    const prods=tipo==='dtf'?DTF_PRODS:tipo==='uv'?UV_PRODS:SUB_PRODS;
-    const p=prods.find(x=>x.name===d.prod||x.key===(tipo==='dtf'?selectedDtf:tipo==='uv'?selectedUv:selectedSub));
+  if(tipo==='dtf'||tipo==='uv'||tipo==='dtfuv'||tipo==='sub'){
+    const prs=tipo==='dtf'?DTF_PR:tipo==='uv'?UV_PR:tipo==='dtfuv'?DTFUV_PR:SUB_PR;
+    const prods=tipo==='dtf'?DTF_PRODS:tipo==='uv'?UV_PRODS:tipo==='dtfuv'?DTFUV_PRODS:SUB_PRODS;
+    const p=prods.find(x=>x.name===d.prod||x.key===(tipo==='dtf'?selectedDtf:tipo==='uv'?selectedUv:tipo==='dtfuv'?selectedDtfuv:selectedSub));
     if(p){const pr2=prs[p.key]||{u:p.u,m12:p.m12,m30:p.m30};const base2=getPrecioTier(pr2,d.qty);mayoreoTag=getTierLabel(d.qty);precioTag='$'+base2+'/pza';}
   }
   multiItems.push({...d,id:Date.now(),mayoreoTag,precioTag});
@@ -2014,7 +2130,7 @@ function renderMultiCatalogo(){
   // tipo especial 'sticker' y 'papel' tienen lógica propia
   const sections=[
     {label:'👕 DTF — Playeras y ropa',prods:DTF_PRODS,pr:DTF_PR,tipo:'DTF'},
-    {label:'🖨️ DTF UV · Vinil',prods:UV_PRODS,pr:UV_PR,tipo:'DTF UV · Vinil'},
+    {label:'🥤 Vasos y cilindros',prods:UV_PRODS,pr:UV_PR,tipo:'Vasos y cilindros'},
     {label:'☕ Sublimacion',prods:SUB_PRODS,pr:SUB_PR,tipo:'Sublimacion'},
     {label:'🏷️ Stickers',prods:null,pr:null,tipo:'sticker'},
     {label:'📄 Impresion en papel',prods:PAPEL_TIPOS,pr:PAP_PR,tipo:'papel'},
@@ -2155,9 +2271,9 @@ function renderMultiCatalogo(){
         }
         else{
           // DTF / UV / SUB
-          const tipoKeyMap={'DTF':'dtf','DTF UV · Vinil':'uv','Sublimacion':'sub'};
-          const prods=tipo==='DTF'?DTF_PRODS:tipo==='DTF UV · Vinil'?UV_PRODS:SUB_PRODS;
-          const prs=tipo==='DTF'?DTF_PR:tipo==='DTF UV · Vinil'?UV_PR:SUB_PR;
+          const tipoKeyMap={'DTF':'dtf','Vasos y cilindros':'uv','DTF UV':'dtfuv','Sublimacion':'sub'};
+          const prods=tipo==='DTF'?DTF_PRODS:tipo==='Vasos y cilindros'?UV_PRODS:tipo==='DTF UV'?DTFUV_PRODS:SUB_PRODS;
+          const prs=tipo==='DTF'?DTF_PR:tipo==='Vasos y cilindros'?UV_PR:tipo==='DTF UV'?DTFUV_PR:SUB_PR;
           const p=prods.find(x=>x.key===pkey);if(!p)return;
           const qty=Math.max(1,parseInt(document.getElementById('mcat-qty-'+pkey).value)||1);
           const pr2=prs[pkey]||{u:p.u||0,m:p.m||0};
@@ -2523,6 +2639,8 @@ function renderAjustes(){
   document.getElementById('pe-dtf').innerHTML=dh;
   let uvh='';UV_PRODS.forEach(p=>{const pr=UV_PR[p.key]||{u:p.u,m12:p.m12,m30:p.m30};uvh+=`<div class="pe-row pe-row3"><span class="pe-sz">${p.name}</span><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="uv" data-f="u" value="${pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="uv" data-f="m12" value="${pr.m12??pr.m??pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="uv" data-f="m30" value="${pr.m30??pr.m12??pr.m??pr.u}"></div>`;});
   const peUv=document.getElementById('pe-uv');if(peUv)peUv.innerHTML=uvh;
+  let dtfuvh='';DTFUV_PRODS.forEach(p=>{const pr=DTFUV_PR[p.key]||{u:p.u,m12:p.m12,m30:p.m30};dtfuvh+=`<div class="pe-row pe-row3"><span class="pe-sz">${p.name}</span><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="dtfuv" data-f="u" value="${pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="dtfuv" data-f="m12" value="${pr.m12??pr.m??pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="dtfuv" data-f="m30" value="${pr.m30??pr.m12??pr.m??pr.u}"></div>`;});
+  const peDtfuv=document.getElementById('pe-dtfuv');if(peDtfuv)peDtfuv.innerHTML=dtfuvh;
   let uh='';SUB_PRODS.forEach(p=>{const pr=SUB_PR[p.key]||{u:p.u,m12:p.m12,m30:p.m30};uh+=`<div class="pe-row pe-row3"><span class="pe-sz">${p.name}</span><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="sub" data-f="u" value="${pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="sub" data-f="m12" value="${pr.m12??pr.m??pr.u}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="sub" data-f="m30" value="${pr.m30??pr.m12??pr.m??pr.u}"></div>`;});
   document.getElementById('pe-sub').innerHTML=uh;
   let ph='';PAPEL_TIPOS.forEach(p=>{const pr=PAP_PR[p.key]||{u1:p.u,u2:p.u2};ph+=`<div class="pe-row pe-row3"><span class="pe-sz">${p.name}</span><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="pap" data-f="u1" value="${pr.u1}"><input class="pe-inp" type="number" min="1" data-k="${p.key}" data-t="pap" data-f="u2" value="${pr.u2??pr.u1}"></div>`;});
@@ -2537,12 +2655,13 @@ document.getElementById('save-prices').addEventListener('click',async()=>{
   document.querySelectorAll('.pe-inp[data-k][data-hoja="complejo"]').forEach(i=>{const k=i.dataset.k,m=i.dataset.m;if(!HOJA_COMPLEJO[k])HOJA_COMPLEJO[k]={normal:0,foto:0};HOJA_COMPLEJO[k][m]=+i.value||1;});
   document.querySelectorAll('.pe-inp[data-t="dtf"]').forEach(i=>{const k=i.dataset.k,f=i.dataset.f;if(!DTF_PR[k])DTF_PR[k]={};DTF_PR[k][f]=+i.value||1;});
   document.querySelectorAll('.pe-inp[data-t="uv"]').forEach(i=>{const k=i.dataset.k,f=i.dataset.f;if(!UV_PR[k])UV_PR[k]={};UV_PR[k][f]=+i.value||1;});
+  document.querySelectorAll('.pe-inp[data-t="dtfuv"]').forEach(i=>{const k=i.dataset.k,f=i.dataset.f;if(!DTFUV_PR[k])DTFUV_PR[k]={};DTFUV_PR[k][f]=+i.value||1;});
   document.querySelectorAll('.pe-inp[data-t="sub"]').forEach(i=>{const k=i.dataset.k,f=i.dataset.f;if(!SUB_PR[k])SUB_PR[k]={};SUB_PR[k][f]=+i.value||1;});
   document.querySelectorAll('.pe-inp[data-t="pap"]').forEach(i=>{const k=i.dataset.k,f=i.dataset.f;if(!PAP_PR[k])PAP_PR[k]={};PAP_PR[k][f]=+i.value||1;});
   const colUpdates=[];
   document.querySelectorAll('.pe-inp[data-t="col"]').forEach(i=>{const p=colInv.find(x=>x.id===i.dataset.k);if(p)colUpdates.push(updateDoc(doc(db,'col_inv',p.id),{precio:+i.value||0}));});
   await Promise.all(colUpdates);
-  await setDoc(doc(db,'config','precios'),{piezaSimple:PIEZA_SIMPLE,piezaComplejo:PIEZA_COMPLEJO,hojaSimple:HOJA_SIMPLE,hojaComplejo:HOJA_COMPLEJO,dtf:DTF_PR,uv:UV_PR,sub:SUB_PR,papel:PAP_PR});
+  await setDoc(doc(db,'config','precios'),{piezaSimple:PIEZA_SIMPLE,piezaComplejo:PIEZA_COMPLEJO,hojaSimple:HOJA_SIMPLE,hojaComplejo:HOJA_COMPLEJO,dtf:DTF_PR,uv:UV_PR,dtfuv:DTFUV_PR,sub:SUB_PR,papel:PAP_PR});
   toast('<strong>Precios guardados</strong> y sincronizados');
   renderDesigns();calcStk();
 });
@@ -2550,7 +2669,7 @@ document.getElementById('save-prices').addEventListener('click',async()=>{
 
 // ── PAGO LOGIC ──
 let stkPagoTipo='efectivo';
-const pagoTipos={stk:'efectivo',dtf:'efectivo',uv:'efectivo',sub:'efectivo',cli:'efectivo',pap:'efectivo',multi:'efectivo'};
+const pagoTipos={stk:'efectivo',dtf:'efectivo',uv:'efectivo',dtfuv:'efectivo',sub:'efectivo',cli:'efectivo',pap:'efectivo',multi:'efectivo'};
 
 window.calcPagoWidget=function(prefix, total){
   // If total not passed, read from the displayed saldo-tot element
@@ -2587,7 +2706,7 @@ function getPagoData(prefix, total){
 }
 
 function initAllPagos(){
-  ['stk','dtf','uv','sub','cli','pap','multi'].forEach(prefix=>{
+  ['stk','dtf','uv','dtfuv','sub','cli','pap','multi'].forEach(prefix=>{
     const wrap=document.getElementById(prefix==='stk'?'sk-pago-tipo':prefix+'-pago-tipo');
     if(!wrap) return;
     wrap.querySelectorAll('.pago-btn').forEach(b=>{
@@ -2752,23 +2871,25 @@ document.querySelectorAll('.aj-price-header').forEach(h=>{
 
 window.showAjustesSection = function(sec){
   document.getElementById('aj-main').style.display = sec==='main'?'block':'none';
-  ['dtf-prod','uv-prod','sub-prod','pap-prod','stk-sizes'].forEach(s=>{
+  ['dtf-prod','uv-prod','dtfuv-prod','sub-prod','pap-prod','stk-sizes'].forEach(s=>{
     const el = document.getElementById('aj-'+s);
     if(el) el.style.display = s===sec?'block':'none';
   });
   if(sec==='dtf-prod') renderAjProdList('dtf');
   if(sec==='uv-prod') renderAjProdList('uv');
+  if(sec==='dtfuv-prod') renderAjProdList('dtfuv');
   if(sec==='sub-prod') renderAjProdList('sub');
   if(sec==='pap-prod') renderAjProdList('papel');
   if(sec==='stk-sizes') renderAjProdList('stk');
 };
 
 function renderAjProdList(tipo){
-  const elId = tipo==='dtf'?'aj-dtf-list':tipo==='uv'?'aj-uv-list':tipo==='sub'?'aj-sub-list':tipo==='papel'?'aj-pap-list':'aj-stk-list';
+  const elId = tipo==='dtf'?'aj-dtf-list':tipo==='uv'?'aj-uv-list':tipo==='dtfuv'?'aj-dtfuv-list':tipo==='sub'?'aj-sub-list':tipo==='papel'?'aj-pap-list':'aj-stk-list';
   const el = document.getElementById(elId); if(!el) return;
   let items = [];
   if(tipo==='dtf') items = DTF_PRODS;
   if(tipo==='uv') items = UV_PRODS;
+  if(tipo==='dtfuv') items = DTFUV_PRODS;
   if(tipo==='sub') items = SUB_PRODS;
   if(tipo==='papel') items = PAPEL_TIPOS;
   if(tipo==='stk') items = STICKER_SIZES;
@@ -2786,6 +2907,7 @@ window.deleteProd = async function(tipo, idx){
   if(!await customConfirm('¿Quitar este producto?')) return;
   if(tipo==='dtf'){ DTF_PRODS.splice(idx,1); delete DTF_PR[DTF_PRODS[idx]?.key||'']; }
   if(tipo==='uv'){ UV_PRODS.splice(idx,1); }
+  if(tipo==='dtfuv'){ DTFUV_PRODS.splice(idx,1); }
   if(tipo==='sub'){ SUB_PRODS.splice(idx,1); }
   if(tipo==='papel'){ PAPEL_TIPOS.splice(idx,1); }
   if(tipo==='stk'){ STICKER_SIZES.splice(idx,1); }
@@ -2822,6 +2944,15 @@ window.saveNewProd = async function(tipo){
     UV_PRODS.push({key,icon:document.getElementById('aj-uv-icon').value||'🥤',name,sub:tamUv?`${descBaseUv}${descBaseUv?' · ':''}${tamUv}`:descBaseUv,u,m12:m,m30:m,tallas});
     UV_PR[key]={u,m12:m,m30:m};
     document.getElementById('aj-uv-name').value='';document.getElementById('aj-uv-icon').value='';document.getElementById('aj-uv-desc').value='';document.getElementById('aj-uv-u').value='';document.getElementById('aj-uv-m').value='';if(document.getElementById('aj-uv-tam'))document.getElementById('aj-uv-tam').value='';
+  }
+  if(tipo==='dtfuv'){
+    const name=document.getElementById('aj-dtfuv-name').value.trim();
+    if(!name){toast('Pon una medida.');return;}
+    const key='custom_'+Date.now();
+    const u=+document.getElementById('aj-dtfuv-u').value||0;
+    DTFUV_PRODS.push({key,icon:document.getElementById('aj-dtfuv-icon').value||'🖨️',name:'Sticker DTF UV '+name+' cm',sub:document.getElementById('aj-dtfuv-desc').value,u,m12:u,m30:u,tallas:['Unica']});
+    DTFUV_PR[key]={u,m12:u,m30:u};
+    document.getElementById('aj-dtfuv-name').value='';document.getElementById('aj-dtfuv-icon').value='';document.getElementById('aj-dtfuv-desc').value='';document.getElementById('aj-dtfuv-u').value='';
   }
   if(tipo==='sub'){
     const name=document.getElementById('aj-sub-name').value.trim();
@@ -2873,6 +3004,7 @@ async function saveProdsToFirebase(){
     await setDoc(doc(db,'config','productos'),{
       dtf_extra: DTF_PRODS.filter(p=>p.key.startsWith('custom_')),
       uv_extra: UV_PRODS.filter(p=>p.key.startsWith('custom_')),
+      dtfuv_extra: DTFUV_PRODS.filter(p=>p.key.startsWith('custom_')),
       sub_extra: SUB_PRODS.filter(p=>p.key.startsWith('custom_')),
       papel_extra: PAPEL_TIPOS.filter(p=>p.key?.startsWith('custom_')),
       stk_extra: STICKER_SIZES.filter(p=>!['3x3','5x5','6x6','7x7','10x10','10x15'].includes(p.key)).map(p=>({...p,pieza:PIEZA_SIMPLE[p.key],piezaComplejo:PIEZA_COMPLEJO[p.key]})),
@@ -2887,6 +3019,7 @@ async function loadCustomProds(){
     const data = d.data();
     if(data.dtf_extra) data.dtf_extra.forEach(p=>{ if(!DTF_PRODS.find(x=>x.key===p.key)){DTF_PRODS.push(p);DTF_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30};} });
     if(data.uv_extra) data.uv_extra.forEach(p=>{ if(!UV_PRODS.find(x=>x.key===p.key)){UV_PRODS.push(p);UV_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30};} });
+    if(data.dtfuv_extra) data.dtfuv_extra.forEach(p=>{ if(!DTFUV_PRODS.find(x=>x.key===p.key)){DTFUV_PRODS.push(p);DTFUV_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30};} });
     if(data.sub_extra) data.sub_extra.forEach(p=>{ if(!SUB_PRODS.find(x=>x.key===p.key)){SUB_PRODS.push(p);SUB_PR[p.key]={u:p.u,m12:p.m12,m30:p.m30};} });
     if(data.papel_extra) data.papel_extra.forEach(p=>{ if(!PAPEL_TIPOS.find(x=>x.key===p.key)){PAPEL_TIPOS.push(p);PAP_PR[p.key]={u1:p.u,u2:p.u2};} });
     if(data.stk_extra) data.stk_extra.forEach(p=>{ if(!STICKER_SIZES.find(x=>x.key===p.key)){STICKER_SIZES.push(p);PIEZA_SIMPLE[p.key]=p.pieza||{normal:5,foto:8};PIEZA_COMPLEJO[p.key]=p.piezaComplejo||{normal:7,foto:10};} });
@@ -3474,10 +3607,11 @@ function renderInvTaller(){
 
   const sections = [
     { label:'👕 DTF', icon:'👕', prods: DTF_PRODS, pr: DTF_PR, tipoKey:'dtf' },
-    { label:'🖨️ DTF UV · Vinil', icon:'🖨️', prods: UV_PRODS, pr: UV_PR, tipoKey:'uv' },
+    { label:'🥤 Vasos y cilindros', icon:'🥤', prods: UV_PRODS, pr: UV_PR, tipoKey:'uv' },
     { label:'☕ Sublimacion', icon:'☕', prods: SUB_PRODS, pr: SUB_PR, tipoKey:'sub' },
     { label:'📄 Papeleria', icon:'📄', prods: PAPEL_TIPOS, pr: PAP_PR, papel: true },
     { label:'🏷️ Stickers', icon:'🏷️', prods: null, sticker: true },
+    { label:'🖨️ DTF UV', icon:'🖨️', prods: DTFUV_PRODS, pr: DTFUV_PR, dtfuvref: true },
   ];
 
   wrap.innerHTML = '';
@@ -3514,6 +3648,19 @@ function renderInvTaller(){
             <div class="inv-prod-u">$${pr.u1}/hoja</div>
             <div class="inv-prod-m">2 caras $${pr.u2}</div>
           </div>
+        </div>`;
+      });
+    } else if(sec.dtfuvref){
+      // DTF UV: se imprime sobre pedido, no se almacena en blanco — solo referencia de precio
+      sec.prods.forEach(p => {
+        const pr = sec.pr[p.key] || { u: p.u };
+        rows_html += `<div class="inv-prod-row">
+          <div class="inv-prod-icon">${p.icon}</div>
+          <div class="inv-prod-info">
+            <div class="inv-prod-name">${p.name}</div>
+            <div class="inv-prod-sub">${p.sub} · impreso sobre pedido</div>
+          </div>
+          <div class="inv-prod-price"><div class="inv-prod-u">$${pr.u}</div></div>
         </div>`;
       });
     } else {
