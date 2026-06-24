@@ -1319,6 +1319,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, deleteDoc, updateDoc, query, orderBy, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
 
 const FB = initializeApp({
   apiKey:"AIzaSyC712zoQmjfvgxa_RDIMB2UCSp93S_mlIo",
@@ -1332,6 +1333,19 @@ const db = getFirestore(FB);
 // Cache local: si se pierde internet un momento, los pedidos no se pierden — se guardan localmente y se sincronizan solos al reconectar.
 // Tambien reduce lecturas repetidas a Firestore (ahorra cuota gratuita).
 try { enableIndexedDbPersistence(db); } catch(e) { console.warn('Persistencia offline no disponible:', e.code); }
+
+// ── AUTENTICACION ANONIMA ──
+// La app se identifica sola ante Firebase sin pedir usuario/contraseña.
+// Esto permite usar reglas de seguridad que solo dejan pasar peticiones autenticadas
+// (request.auth != null) en vez de dejar la base de datos abierta a cualquiera.
+const auth = getAuth(FB);
+let authReady = new Promise(resolve => {
+  onAuthStateChanged(auth, user => {
+    if(user) resolve(user);
+  });
+});
+signInAnonymously(auth).catch(e => console.error('Error de autenticacion anonima:', e));
+
 const VAPID = 'BNn_SLS6m84WeGxBPCAhvq6pKcGYzVX3t78Mv0ZYqOv-WGtEKUkieqRpqU6wDEgyn91pJXUOSKEsAPzQhYgLbcg';
 
 // ── TOAST ──
@@ -3822,6 +3836,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── INIT ──
 async function init(){
+  await authReady; // espera a que termine el inicio de sesion anonimo antes de leer/escribir en Firestore
   await loadGastos();
 
   // Unregister any old service workers from previous domains (Netlify etc)
