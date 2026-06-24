@@ -1317,7 +1317,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--ink);disp
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, deleteDoc, updateDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, deleteDoc, updateDoc, query, orderBy, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
 import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
 
 const FB = initializeApp({
@@ -1329,9 +1329,73 @@ const FB = initializeApp({
   appId:"1:615648184021:web:abaa32547b5f746828445c"
 });
 const db = getFirestore(FB);
+// Cache local: si se pierde internet un momento, los pedidos no se pierden — se guardan localmente y se sincronizan solos al reconectar.
+// Tambien reduce lecturas repetidas a Firestore (ahorra cuota gratuita).
+try { enableIndexedDbPersistence(db); } catch(e) { console.warn('Persistencia offline no disponible:', e.code); }
 const VAPID = 'BNn_SLS6m84WeGxBPCAhvq6pKcGYzVX3t78Mv0ZYqOv-WGtEKUkieqRpqU6wDEgyn91pJXUOSKEsAPzQhYgLbcg';
 
 // ── TOAST ──
+
+// ── Reemplazo de prompt()/confirm() nativo — no funciona confiable dentro de PWA instaladas (sobre todo iOS) ──
+function customPrompt(title, defaultVal='', type='text'){
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='corte-modal-overlay';
+    overlay.innerHTML=`<div class="corte-modal">
+      <div class="corte-modal-title">${title}</div>
+      <input class="inp" id="cprompt-input" type="${type}" value="${defaultVal}" style="margin-top:14px;font-size:16px;padding:14px;">
+      <div class="act2" style="margin-top:16px;">
+        <button class="btn-s" id="cprompt-cancel">Cancelar</button>
+        <button class="btn-p" id="cprompt-ok">Aceptar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const input=overlay.querySelector('#cprompt-input');
+    setTimeout(()=>{ input.focus(); input.select(); }, 50);
+    function finish(val){ overlay.remove(); resolve(val); }
+    overlay.querySelector('#cprompt-ok').addEventListener('click', ()=>finish(input.value.trim()===''?null:input.value.trim()));
+    overlay.querySelector('#cprompt-cancel').addEventListener('click', ()=>finish(null));
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') finish(input.value.trim()===''?null:input.value.trim()); });
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) finish(null); });
+  });
+}
+function customSelect(title, options){
+  // options: array de strings — devuelve el indice seleccionado o null si cancela
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='corte-modal-overlay';
+    const btns=options.map((o,i)=>`<button class="btn-s" data-i="${i}" style="width:100%;margin-bottom:8px;text-align:left;">${o}</button>`).join('');
+    overlay.innerHTML=`<div class="corte-modal">
+      <div class="corte-modal-title">${title}</div>
+      <div style="margin-top:14px;">${btns}</div>
+      <button class="btn-s" id="cselect-cancel" style="margin-top:4px;">Cancelar</button>
+    </div>`;
+    document.body.appendChild(overlay);
+    function finish(val){ overlay.remove(); resolve(val); }
+    overlay.querySelectorAll('[data-i]').forEach(b=>b.addEventListener('click', ()=>finish(+b.dataset.i)));
+    overlay.querySelector('#cselect-cancel').addEventListener('click', ()=>finish(null));
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) finish(null); });
+  });
+}
+function customConfirm(title){
+  return new Promise(resolve=>{
+    const overlay=document.createElement('div');
+    overlay.className='corte-modal-overlay';
+    overlay.innerHTML=`<div class="corte-modal">
+      <div class="corte-modal-title">${title}</div>
+      <div class="act2" style="margin-top:18px;">
+        <button class="btn-s" id="cconfirm-no">Cancelar</button>
+        <button class="btn-p" id="cconfirm-yes" style="background:var(--red);">Confirmar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    function finish(val){ overlay.remove(); resolve(val); }
+    overlay.querySelector('#cconfirm-yes').addEventListener('click', ()=>finish(true));
+    overlay.querySelector('#cconfirm-no').addEventListener('click', ()=>finish(false));
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) finish(false); });
+  });
+}
+
 function toast(msg, dur=3000){
   const t=document.getElementById('toast');
   t.innerHTML=msg; t.classList.add('show');
@@ -1344,6 +1408,18 @@ function setSynced(ok){
   const s=document.getElementById('hdr-sub');
   d.className='sync-dot'+(ok?'':' off');
   s.textContent=ok?'Sincronizado':'Sin conexion';
+  let banner=document.getElementById('offline-banner');
+  if(!ok){
+    if(!banner){
+      banner=document.createElement('div');
+      banner.id='offline-banner';
+      banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--red);color:#fff;padding:12px 16px;text-align:center;font-size:13px;font-weight:700;font-family:"Poppins",sans-serif;';
+      banner.innerHTML='⚠️ Sin conexión con la base de datos — los pedidos NO se están guardando. <span style="text-decoration:underline;cursor:pointer;" onclick="location.reload()">Reintentar</span>';
+      document.body.prepend(banner);
+    }
+  } else if(banner){
+    banner.remove();
+  }
 }
 
 // ── NOTIFICATIONS ──
@@ -1741,8 +1817,14 @@ document.getElementById('sk-save').addEventListener('click',async()=>{
   const anticipo=parseFloat(document.getElementById('sk-anticipo')?.value||'0')||0;
   const saldo=Math.max(0,stkCalc.sub-anticipo);
   const id=genId();
-  await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:document.getElementById('sk-tel').value,nota:document.getElementById('sk-nota').value,tipo:'Stickers '+(stkCalc.corte==='complejo'?'Complejo':'Simple')+'-'+(stkCalc.mat==='foto'?'Foto':'Mate'),detalle:stkCalc.bdRows.map(r=>r.name+' ×'+r.qty).join(', '),total:stkCalc.sub,status:'pendiente',pago:{tipo:stkPagoTipo,anticipo,saldo,pagado:saldo===0}});
-  toast(anticipo>0?`<strong>Pedido guardado</strong> · Anticipo $${anticipo.toLocaleString('es-MX')} · Saldo $${saldo.toLocaleString('es-MX')}`:`<strong>Pedido guardado</strong> y sincronizado`);
+  try {
+    await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:document.getElementById('sk-tel').value,nota:document.getElementById('sk-nota').value,tipo:'Stickers '+(stkCalc.corte==='complejo'?'Complejo':'Simple')+'-'+(stkCalc.mat==='foto'?'Foto':'Mate'),detalle:stkCalc.bdRows.map(r=>r.name+' ×'+r.qty).join(', '),total:stkCalc.sub,status:'pendiente',pago:{tipo:stkPagoTipo,anticipo,saldo,pagado:saldo===0}});
+  } catch(e) {
+    console.error('Error guardando pedido de stickers:', e);
+    toast(`<strong>⚠️ NO se guardó el pedido</strong><br>${e.code==='resource-exhausted'?'Se agotó la cuota gratuita de Firebase por hoy.':e.code==='permission-denied'?'Sin permisos en la base de datos.':'Error: '+(e.message||e.code||'desconocido')}`, 6000);
+    return;
+  }
+  toast(anticipo>0?`<strong>✓ Pedido guardado</strong> · Anticipo $${anticipo.toLocaleString('es-MX')} · Saldo $${saldo.toLocaleString('es-MX')}`:`<strong>✓ Pedido guardado</strong> y sincronizado`);
   document.getElementById('sk-cli').value='';document.getElementById('sk-tel').value='';document.getElementById('sk-nota').value='';
   if(document.getElementById('sk-anticipo')) document.getElementById('sk-anticipo').value='';
 });
@@ -1865,13 +1947,19 @@ function getSrvData(tipo){
 
 async function saveSrvPed(tipo){
   const d=getSrvData(tipo);if(!d){toast('Selecciona un producto.');return;}
-  const cli=prompt('Nombre del cliente:','');if(!cli){toast('El nombre es obligatorio.');return;}
+  const cli=await customPrompt('Nombre del cliente');if(!cli){toast('El nombre es obligatorio.');return;}
   const id=genId();const folio=genFolio();
   const detStr=d.nombre+' ×'+d.qty+(d.varStr?' | '+d.varStr:'');
   const pagoD=getPagoData(tipo==='dtf'?'dtf':tipo==='sub'?'sub':'cli',d.total);
-  await setDoc(doc(db,'pedidos',id),{id,folio,fecha:new Date().toISOString(),cliente:cli,tel:'',nota:d.nota,tipo:d.tipo,detalle:detStr,total:d.total,status:'pendiente',variantes:d.variantes||[],pago:pagoD});
-  if(d.tipoKey && d.prodKey) decrementStock(d.tipoKey, d.prodKey, d.variantes, d.qty);
-  toast(pagoD.anticipo>0?`<strong>Pedido guardado</strong> · Anticipo $${pagoD.anticipo.toLocaleString('es-MX')} · Saldo $${pagoD.saldo.toLocaleString('es-MX')}`:`<strong>Pedido guardado!</strong>`);
+  try {
+    await setDoc(doc(db,'pedidos',id),{id,folio,fecha:new Date().toISOString(),cliente:cli,tel:'',nota:d.nota,tipo:d.tipo,detalle:detStr,total:d.total,status:'pendiente',variantes:d.variantes||[],pago:pagoD});
+  } catch(e) {
+    console.error('Error guardando pedido:', e);
+    toast(`<strong>⚠️ NO se guardó el pedido</strong><br>${e.code==='resource-exhausted'?'Se agotó la cuota gratuita de Firebase por hoy.':e.code==='permission-denied'?'Sin permisos en la base de datos.':'Error: '+(e.message||e.code||'desconocido')}`, 6000);
+    return;
+  }
+  try { if(d.tipoKey && d.prodKey) decrementStock(d.tipoKey, d.prodKey, d.variantes, d.qty); } catch(e){ console.error('Error descontando stock:', e); }
+  toast(pagoD.anticipo>0?`<strong>✓ Pedido guardado</strong> · Anticipo $${pagoD.anticipo.toLocaleString('es-MX')} · Saldo $${pagoD.saldo.toLocaleString('es-MX')}`:`<strong>✓ Pedido guardado!</strong>`);
 }
 function sendSrvCot(tipo){
   const d=getSrvData(tipo);if(!d){toast('Selecciona un producto.');return;}
@@ -2105,11 +2193,17 @@ document.getElementById('multi-save').addEventListener('click',async()=>{
   const detalle=multiItems.map(i=>i.nombre+' ×'+i.qty+(i.varStr?' ('+i.varStr+')':'')).join(' | ');
   const id=genId();
   const multiPago=getPagoData('multi',total);
-  await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:document.getElementById('multi-tel').value,nota:document.getElementById('multi-nota').value,tipo:tipos,detalle,total,status:'pendiente',pago:multiPago});
-  multiItems.forEach(i=>{ if(i.tipoKey && i.prodKey) decrementStock(i.tipoKey, i.prodKey, i.variantes, i.qty); });
+  try {
+    await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:document.getElementById('multi-tel').value,nota:document.getElementById('multi-nota').value,tipo:tipos,detalle,total,status:'pendiente',pago:multiPago});
+  } catch(e) {
+    console.error('Error guardando pedido mixto:', e);
+    toast(`<strong>⚠️ NO se guardó el pedido</strong><br>${e.code==='resource-exhausted'?'Se agotó la cuota gratuita de Firebase por hoy.':e.code==='permission-denied'?'Sin permisos en la base de datos.':'Error: '+(e.message||e.code||'desconocido')}`, 6000);
+    return;
+  }
+  multiItems.forEach(i=>{ try { if(i.tipoKey && i.prodKey) decrementStock(i.tipoKey, i.prodKey, i.variantes, i.qty); } catch(e){ console.error('Error descontando stock:', e); } });
   multiItems=[];
   document.getElementById('multi-cli').value='';document.getElementById('multi-tel').value='';document.getElementById('multi-nota').value='';
-  toast('<strong>Pedido guardado!</strong>');renderMulti();
+  toast('<strong>✓ Pedido guardado!</strong>');renderMulti();
 });
 
 // ── PAPELERIA ──
@@ -2155,7 +2249,7 @@ document.getElementById('pap-cot').addEventListener('click',()=>{
 });
 document.getElementById('pap-save').addEventListener('click',async()=>{
   const p=PAPEL_TIPOS.find(x=>x.key===selectedPapel);if(!p){toast('Selecciona tipo de papel.');return;}
-  const cli=prompt('Nombre del cliente:','');if(!cli)return;
+  const cli=await customPrompt('Nombre del cliente');if(!cli)return;
   const pr=PAP_PR[p.key]||{u1:p.u,u2:p.u2};
   const hojas=parseInt(document.getElementById('pap-hojas').value)||1;
   const caras=parseInt(document.getElementById('pap-caras').value)||1;
@@ -2164,8 +2258,14 @@ document.getElementById('pap-save').addEventListener('click',async()=>{
   const total=hojas*(base+corteExtra);
   const id=genId();
   const papPago=getPagoData('pap',total);
-  await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:'',nota:document.getElementById('pap-nota').value,tipo:'Papeleria/Impresion',detalle:`${document.getElementById('pap-nom').value||p.name} — ${p.name} ${caras} cara${caras>1?'s':''} ${hojas} hoja${hojas>1?'s':''}`,total,status:'pendiente',pago:papPago});
-  toast(papPago.anticipo>0?`<strong>Pedido guardado</strong> · Anticipo $${papPago.anticipo.toLocaleString('es-MX')}`:'<strong>Pedido guardado!</strong>');
+  try {
+    await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:'',nota:document.getElementById('pap-nota').value,tipo:'Papeleria/Impresion',detalle:`${document.getElementById('pap-nom').value||p.name} — ${p.name} ${caras} cara${caras>1?'s':''} ${hojas} hoja${hojas>1?'s':''}`,total,status:'pendiente',pago:papPago});
+  } catch(e) {
+    console.error('Error guardando pedido de papel:', e);
+    toast(`<strong>⚠️ NO se guardó el pedido</strong><br>${e.code==='resource-exhausted'?'Se agotó la cuota gratuita de Firebase por hoy.':e.code==='permission-denied'?'Sin permisos en la base de datos.':'Error: '+(e.message||e.code||'desconocido')}`, 6000);
+    return;
+  }
+  toast(papPago.anticipo>0?`<strong>✓ Pedido guardado</strong> · Anticipo $${papPago.anticipo.toLocaleString('es-MX')}`:'<strong>✓ Pedido guardado!</strong>');
 });
 
 // ── PEDIDOS ──
@@ -2199,7 +2299,7 @@ function renderKCol(id,items){
   });
   el.querySelectorAll('.k-btn[data-next]').forEach(b=>b.addEventListener('click',async()=>{await updateDoc(doc(db,'pedidos',b.dataset.id),{status:b.dataset.next});toast('Estado actualizado');}));
   el.querySelectorAll('.k-btn[data-wa]').forEach(b=>b.addEventListener('click',()=>{const p=pedidos.find(x=>x.id===b.dataset.wa);if(!p)return;shareWA(buildListoWA(p.cliente,p.tel||'',p.tipo,[p.tipo+': '+p.detalle],p.total||0,p.nota||'',p.folio||''));}));
-  el.querySelectorAll('.k-btn[data-del]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Cancelar este pedido?'))return;await updateDoc(doc(db,'pedidos',b.dataset.id),{status:'cancelado'});toast('Pedido cancelado');}));
+  el.querySelectorAll('.k-btn[data-del]').forEach(b=>b.addEventListener('click',async()=>{if(!await customConfirm('¿Cancelar este pedido?'))return;await updateDoc(doc(db,'pedidos',b.dataset.id),{status:'cancelado'});toast('Pedido cancelado');}));
 }
 
 // ── Calcula rango de fechas según filtro activo ──
@@ -2314,8 +2414,8 @@ window.renderHistFiltrado = function(){
 function attachHistListeners(el){
   el.querySelectorAll('.hbtn[data-cot]').forEach(b=>b.addEventListener('click',()=>{const p=pedidos.find(x=>x.id===b.dataset.cot);if(!p)return;shareWA(buildCotWA(p.cliente,p.tel||'',p.tipo,[p.tipo+': '+p.detalle],p.total||0,p.nota||'',p.folio||''));}));
   el.querySelectorAll('.hbtn[data-wa2]').forEach(b=>b.addEventListener('click',()=>{const p=pedidos.find(x=>x.id===b.dataset.wa2);if(!p)return;shareWA(buildListoWA(p.cliente,p.tel||'',p.tipo,[p.tipo+': '+p.detalle],p.total||0,p.nota||'',p.folio||''));}));
-  el.querySelectorAll('.hbtn[data-canc]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Marcar como cancelado?'))return;await updateDoc(doc(db,'pedidos',b.dataset.canc),{status:'cancelado'});toast('Pedido cancelado');}));
-  el.querySelectorAll('.hbtn[data-elim]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Eliminar permanentemente?'))return;await deleteDoc(doc(db,'pedidos',b.dataset.elim));toast('Pedido eliminado');}));
+  el.querySelectorAll('.hbtn[data-canc]').forEach(b=>b.addEventListener('click',async()=>{if(!await customConfirm('¿Marcar como cancelado?'))return;await updateDoc(doc(db,'pedidos',b.dataset.canc),{status:'cancelado'});toast('Pedido cancelado');}));
+  el.querySelectorAll('.hbtn[data-elim]').forEach(b=>b.addEventListener('click',async()=>{if(!await customConfirm('¿Eliminar permanentemente?'))return;await deleteDoc(doc(db,'pedidos',b.dataset.elim));toast('Pedido eliminado');}));
 }
 
 function renderHistPorMes(){
@@ -2341,12 +2441,14 @@ function renderColeccionista(){
     });
     el.querySelectorAll('.col-btn[data-id]').forEach(b=>b.addEventListener('click',async()=>{
       const p=colInv.find(x=>x.id===b.dataset.id);if(!p||p.stock===0){toast('Sin stock disponible.');return;}
-      const qty=parseInt(prompt('Cuantas unidades vender?','1'))||0;
+      const qty=parseInt(await customPrompt('¿Cuántas unidades vender?','1','number'))||0;
       if(qty<=0)return;if(qty>p.stock){toast('Stock insuficiente.');return;}
       const totalVenta=qty*(p.precio||0);
       const pagoOpts=['Efectivo','Tarjeta','Transferencia'];
-      const pagoTipo=pagoOpts[parseInt(prompt(`Forma de pago:\n0: Efectivo\n1: Tarjeta\n2: Transferencia`,'0'))||0]||'Efectivo';
-      const anticipo=parseFloat(prompt(`Anticipo recibido de $${totalVenta.toLocaleString('es-MX')} (0 = pago completo):`,'0'))||0;
+      const pagoIdx=await customSelect('Forma de pago', pagoOpts);
+      if(pagoIdx===null)return;
+      const pagoTipo=pagoOpts[pagoIdx]||'Efectivo';
+      const anticipo=parseFloat(await customPrompt(`Anticipo recibido de $${totalVenta.toLocaleString('es-MX')} (0 = pago completo)`,'0','number'))||0;
       const saldo=Math.max(0,totalVenta-anticipo);
       await updateDoc(doc(db,'col_inv',p.id),{stock:p.stock-qty});
       const vid=genId();
@@ -2355,12 +2457,12 @@ function renderColeccionista(){
     }));
     el.querySelectorAll('.col-btn[data-add]').forEach(b=>b.addEventListener('click',async()=>{
       const p=colInv.find(x=>x.id===b.dataset.id);if(!p)return;
-      const qty=parseInt(prompt('Cuantas unidades agregar?','1'))||0;
+      const qty=parseInt(await customPrompt('¿Cuántas unidades agregar?','1','number'))||0;
       if(qty<=0)return;
       await updateDoc(doc(db,'col_inv',p.id),{stock:p.stock+qty});
       toast('Stock actualizado');
     }));
-    el.querySelectorAll('.col-btn[data-del]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Eliminar producto?'))return;await deleteDoc(doc(db,'col_inv',b.dataset.del));toast('Eliminado');}));
+    el.querySelectorAll('.col-btn[data-del]').forEach(b=>b.addEventListener('click',async()=>{if(!await customConfirm('¿Eliminar este producto?'))return;await deleteDoc(doc(db,'col_inv',b.dataset.del));toast('Eliminado');}));
   }
   const vh=document.getElementById('col-vent-hist');
   if(colVentas.length===0){vh.innerHTML='<div class="empty">Sin ventas registradas.</div>';return;}
@@ -2626,7 +2728,7 @@ document.getElementById('ped-search')?.addEventListener('input', e => {
     resultsEl.appendChild(div);
   });
   resultsEl.querySelectorAll('.hbtn[data-sw]').forEach(b=>b.addEventListener('click',()=>{const p=pedidos.find(x=>x.id===b.dataset.sw);if(!p)return;shareWA(buildListoWA(p.cliente,p.tel||'',p.tipo,[p.tipo+': '+p.detalle],p.total||0,p.nota||'',p.folio||''));}));
-  resultsEl.querySelectorAll('.hbtn[data-se]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm('Eliminar permanentemente?'))return;await deleteDoc(doc(db,'pedidos',b.dataset.se));toast('Eliminado');}));
+  resultsEl.querySelectorAll('.hbtn[data-se]').forEach(b=>b.addEventListener('click',async()=>{if(!await customConfirm('¿Eliminar permanentemente?'))return;await deleteDoc(doc(db,'pedidos',b.dataset.se));toast('Eliminado');}));
 });
 
 // ── AJUSTES SECTIONS ──
@@ -2667,7 +2769,7 @@ function renderAjProdList(tipo){
 }
 
 window.deleteProd = async function(tipo, idx){
-  if(!confirm('Quitar este producto?')) return;
+  if(!await customConfirm('¿Quitar este producto?')) return;
   if(tipo==='dtf'){ DTF_PRODS.splice(idx,1); delete DTF_PR[DTF_PRODS[idx]?.key||'']; }
   if(tipo==='uv'){ UV_PRODS.splice(idx,1); }
   if(tipo==='sub'){ SUB_PRODS.splice(idx,1); }
@@ -3125,15 +3227,21 @@ document.getElementById('csrv-cot')?.addEventListener('click',()=>{
 
 document.getElementById('csrv-save')?.addEventListener('click', async()=>{
   if(!selectedCsrv){toast('Selecciona un producto.');return;}
-  const cli=prompt('Nombre del cliente:','');if(!cli)return;
+  const cli=await customPrompt('Nombre del cliente');if(!cli)return;
   const qty=parseInt(document.getElementById('csrv-qty').value)||1;
   const mayo=qty>=12; const base=mayo?selectedCsrv.m:selectedCsrv.u;
   const tot=qty*base;
   const srv=serviciosPersonalizados.find(s=>s.id===currentCsrvId);
   const pagoD=getPagoData('csrv',tot);
   const id=genId();
-  await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:'',nota:document.getElementById('csrv-nota').value,tipo:srv?.nombre||'Servicio',detalle:document.getElementById('csrv-nom').value||selectedCsrv.name+' ×'+qty,total:tot,status:'pendiente',pago:pagoD});
-  toast('<strong>Pedido guardado!</strong>');
+  try {
+    await setDoc(doc(db,'pedidos',id),{id,folio:genFolio(),fecha:new Date().toISOString(),cliente:cli,tel:'',nota:document.getElementById('csrv-nota').value,tipo:srv?.nombre||'Servicio',detalle:document.getElementById('csrv-nom').value||selectedCsrv.name+' ×'+qty,total:tot,status:'pendiente',pago:pagoD});
+  } catch(e) {
+    console.error('Error guardando pedido de servicio personalizado:', e);
+    toast(`<strong>⚠️ NO se guardó el pedido</strong><br>${e.code==='resource-exhausted'?'Se agotó la cuota gratuita de Firebase por hoy.':e.code==='permission-denied'?'Sin permisos en la base de datos.':'Error: '+(e.message||e.code||'desconocido')}`, 6000);
+    return;
+  }
+  toast('<strong>✓ Pedido guardado!</strong>');
 });
 
 // ── AJUSTES: show custom services for editing ──
@@ -3183,9 +3291,9 @@ function renderAjustesCustomSrvs(){
   // Wire add product to existing service
   el.querySelectorAll('.btn-add[data-nsrvprod]').forEach(b=>b.addEventListener('click',async()=>{
     const si=+b.dataset.nsrvprod;
-    const name=prompt('Nombre del producto:',''); if(!name) return;
-    const u=parseFloat(prompt('Precio unitario:','0'))||0;
-    const m=parseFloat(prompt('Precio mayoreo:','0'))||0;
+    const name=await customPrompt('Nombre del producto'); if(!name) return;
+    const u=parseFloat(await customPrompt('Precio unitario','0','number'))||0;
+    const m=parseFloat(await customPrompt('Precio mayoreo','0','number'))||0;
     serviciosPersonalizados[si].prods.push({key:'p_'+Date.now(),icon:'📦',name,u,m});
     await saveServiciosPersonalizados();
     renderAjustesCustomSrvs();
@@ -3194,7 +3302,7 @@ function renderAjustesCustomSrvs(){
   }));
   // Wire delete service
   el.querySelectorAll('.btn-s[data-delsrv]').forEach(b=>b.addEventListener('click',async()=>{
-    if(!confirm('Eliminar este servicio y todos sus productos?')) return;
+    if(!await customConfirm('¿Eliminar este servicio y todos sus productos?')) return;
     serviciosPersonalizados.splice(+b.dataset.delsrv,1);
     await saveServiciosPersonalizados();
     renderAjustesCustomSrvs();
